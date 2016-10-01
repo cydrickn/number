@@ -1,6 +1,8 @@
 {
     "name": "cydrickn/number",
-    "description": "Number will help to fix the issues of float values in PHP",
+    "description": "An arbitrary precision for floating point Numbers for PHP",
+    "keywords": ["arbitary","number","format","decimal"],
+    "license": "MIT",
     "authors": [
         {
             "name": "Cydrick Nonog",
