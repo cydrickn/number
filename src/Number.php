@@ -178,7 +178,7 @@ class Number {
      */
     public function times($num){
         $num = $this->format($num);
-        $result = $this->value - $num;
+        $result = $this->value * $num;
         return new Number($result);
     }
     
