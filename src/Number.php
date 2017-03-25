@@ -9,6 +9,8 @@ class Number {
     );
     
     protected $value;
+    
+    protected $original;
 
 
     // Static Methods
@@ -33,22 +35,23 @@ class Number {
             throw new \Exception('Number is expecting 1 parameters to be a number.');
         
         $config = array_replace_recursive(static::$config, $config);
-        
+       
         $broken_number = explode('.', $num.'');
         if(count($broken_number) != 2)
             $broken_number[1] = str_pad ('', $config['precision'], '0', STR_PAD_RIGHT);
+        else $broken_number[1] = str_pad ($broken_number[1], $config['precision'], '0', STR_PAD_RIGHT);
         
-        if($config['round']){
-            return number_format (
-                    $broken_number[0] . '.' . $broken_number[1],
-                    $config['precision'],'.',''
-                    );
-        } else if(!$config['round']) {
-            return number_format (
-                    $broken_number[0] . '.' . substr($broken_number[1], 0, $config['precision']),
-                    $config['precision'],'.',''
-                    );
+        if($config['round']) {
+            if($config['precision'] < strlen($broken_number[1])) {
+                $pre = substr($broken_number[1], $config['precision'], 1);
+                $broken_number[1] = substr($broken_number[1], 0, $config['precision']);
+                if($pre >= 5) {
+                    $broken_number[1] += 1;
+                }
+            }
         }
+        
+        return implode('.', $broken_number);
     }
     
     /**
@@ -85,6 +88,18 @@ class Number {
     public static function mul($num1, $num2){
         $num1 = new Number($num1);
         return $num1->times($num2);
+    }
+    
+    /**
+     * Get the power
+     * 
+     * @param float|string|\Cydrickn\Number\Number $num1
+     * @param float|string|\Cydrickn\Number\Number $exponent
+     * @return \Cydrickn\Number\Number
+     */
+    public static function pow($num1, $exponent) {
+        $num1 = new Number($num1);
+        return $num1->toPower($exponent);
     }
     
     /**
@@ -182,6 +197,22 @@ class Number {
         return new Number($result);
     }
     
+    /**
+     * To Power
+     * 
+     * @param float|string|\Cydrickn\Number\Number $num
+     * @return \Cydrickn\Number\Number
+     */
+    public function toPower($num) {
+        $_num = $this;
+        /*for($i = 1; $i < $num; $i++) {
+            $num2 = $this->format($this->value);
+            $_num = $_num->times($num2);
+        }*/
+        $_num = new Number(pow($this->value, $num));
+        return $_num;
+    }
+    
     # end of arithmetic
     
     # Comparison and equality
@@ -262,6 +293,112 @@ class Number {
     public function toFloat(){
         return floatval($this->value);
     }
+    
+    /**
+     * Parse an equation
+     * 
+     * @param sting $string
+     * @param array $vars
+     * @return \Cydrickn\Number\Number
+     */
+    public static function parseEquation($string, $vars = array()) {
+        $index = 0;
+        $array_parse = array();
+        $type = null;
+        for($i = 0;$i < strlen($string);$i++) {
+            $char = $string[$i];
+            if($char == '(') {
+                $type = 'arr';
+                $parse = "";
+                $open = 0;
+                for($ii = $i+1; $ii < strlen($string);$ii++) {
+                    if($string[$ii] == "(") $open++;
+                    if($string[$ii] == ")") $open--;
+                    
+                    if($open == -1) break;
+                    else $parse .= $string[$ii];
+                }
+                $i = $ii;
+                if(array_key_exists($index, $array_parse)) {
+                    $index++;
+                }
+                $array_parse[$index] = self::parseEquation($parse);
+            } else if(self::isOperator($char) && $type != 'opr' && !is_null($type)) {
+                if(array_key_exists($index, $array_parse)) {
+                    $index++;
+                }
+                $type = 'opr';
+                $array_parse[$index] = $char;
+            } else {
+                if(array_key_exists($index, $array_parse) && $type != 'num') {
+                    if($type == 'arr') {
+                        $index++;
+                        $array_parse[$index] = '*';
+                    }
+                    $index++;
+                    $array_parse[$index] = '';
+                } else if(!array_key_exists($index, $array_parse)) {
+                    $array_parse[$index] = '';
+                }
+                $type = 'num';
+                $array_parse[$index] .= $char;
+            }
+        }
+        self::subtitute($array_parse, $vars);
+        return new Number(self::compute($array_parse, $vars));
+    }
+    
+    private static function subtitute(&$array, $vars = array()) {
+        foreach($array as &$arr) {
+            if(!self::isOperator($arr)) {
+                if(array_key_exists($arr, $vars)) {
+                    $arr = $vars[$arr];
+                }
+            }
+        }
+    }
+    
+    private static function compute($array) {
+        $new_array = $array;
+        foreach(self::getOperators() as $opr) {
+            for($index = 0;$index < count($new_array);$index++) {
+                $val = $new_array[$index];
+                if(self::isOperator($val) && $val == $opr) {
+                    $num1 = $new_array[$index-1];
+                    $num2 = $new_array[$index+1];
+                    $num = new Number($num1);
+                    switch ($val) {
+                        case '+': 
+                            $num = $num->plus($num2);break;
+                        case '-': 
+                            $num = $num->minus($num2);break;
+                        case '*': 
+                            $num = $num->times($num2);break;
+                        case '/': 
+                            $num = $num->dividedBy($num2);break;
+                        case '%': 
+                            $num = $num->modulo($num2);break;
+                        case '^':
+                            $num = $num->toPower($num2);break;
+                        default: $num = new Number($num2);
+                    }
+                    array_splice($new_array, $index-1, 3, $num);
+                    $index=-1;
+                }
+            }
+        }
+        return $new_array[0];
+    }
+    
+    private static function getOperators() {
+        return array('^','%','*','/','+','-');
+    }
+    
+    private static function isOperator($operator) {
+        if($operator instanceof Number) return false;
+        return in_array($operator, self::getOperators());
+    }
+    
     
     // End of mehods
     
