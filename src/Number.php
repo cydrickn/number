@@ -12,7 +12,6 @@ class Number {
     
     protected $original;
 
-
     // Static Methods
     
     /**
@@ -301,13 +300,20 @@ class Number {
      * @param array $vars
      * @return \Cydrickn\Number\Number
      */
-    public static function parseEquation($string, $vars = array()) {
+    public static function parseEquation($string, $vars = array(), $compute = true) {
         $index = 0;
         $array_parse = array();
         $type = null;
         for($i = 0;$i < strlen($string);$i++) {
             $char = $string[$i];
             if($char == '(') {
+                
+                if($type == 'num' || $type == 'arr') {
+                    $index++;
+                    $array_parse[$index] = '*';
+                    $index++;
+                }
+                
                 $type = 'arr';
                 $parse = "";
                 $open = 0;
@@ -322,7 +328,9 @@ class Number {
                 if(array_key_exists($index, $array_parse)) {
                     $index++;
                 }
-                $array_parse[$index] = self::parseEquation($parse);
+                if($compute)
+                    $array_parse[$index] = self::parseEquation($parse, $vars, $compute);
+                else $array_parse[$index] = '('.self::parseEquation($parse, $vars, $compute).')';
             } else if(self::isOperator($char) && $type != 'opr' && !is_null($type)) {
                 if(array_key_exists($index, $array_parse)) {
                     $index++;
@@ -345,13 +353,15 @@ class Number {
             }
         }
         self::subtitute($array_parse, $vars);
-        return new Number(self::compute($array_parse, $vars));
+        if($compute)
+            return (new Number(self::compute($array_parse, $vars)));
+        return implode('',$array_parse);
     }
     
     private static function subtitute(&$array, $vars = array()) {
         foreach($array as &$arr) {
             if(!self::isOperator($arr)) {
-                if(array_key_exists($arr, $vars)) {
+                if(is_string($arr) && array_key_exists($arr, $vars)) {
                     $arr = $vars[$arr];
                 }
             }
@@ -382,8 +392,8 @@ class Number {
                             $num = $num->toPower($num2);break;
                         default: $num = new Number($num2);
                     }
-                    array_splice($new_array, $index-1, 3, $num);
-                    $index=-1;
+                    array_splice($new_array, $index-1, 3, $num . '');
+                    $index-=1;
                 }
             }
         }
