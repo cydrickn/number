@@ -373,7 +373,7 @@ class Number {
         foreach(self::getOperators() as $opr) {
             for($index = 0;$index < count($new_array);$index++) {
                 $val = $new_array[$index];
-                if(self::isOperator($val) && $val == $opr) {
+                if(self::isOperator($val) && $val === $opr) {
                     $num1 = $new_array[$index-1];
                     $num2 = $new_array[$index+1];
                     $num = new Number($num1);
@@ -406,7 +406,14 @@ class Number {
     
     private static function isOperator($operator) {
         if($operator instanceof Number) return false;
-        return in_array($operator, self::getOperators());
+        $has = false;
+        foreach(self::getOperators() as $op) {
+            if($operator === $op) {
+                $has = true;
+                break;
+            }
+        }
+        return $has;
     }
     
     
