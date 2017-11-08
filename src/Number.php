@@ -1,125 +1,136 @@
 <?php
+
 namespace Cydrickn\Number;
 
-class Number {
-    
+class Number
+{
     protected static $config = array(
         'precision'    => 20,
-        'round'  => true
+        'round'  => true,
     );
-    
+
     protected $value;
-    
     protected $original;
-    
     private $localConfig;
 
-    // Static Methods
-    
     /**
      * Set the configuration
      * @param type $config
      */
-    public static function setConfig($config){
+    public static function setConfig($config)
+    {
         static::$config = array_replace_recursive(static::$config, $config);
     }
-    
+
     /**
      * Format the number
-     * 
+     *
      * @param float $num
      * @param array $config
+     *
      * @return string
      */
-    public static function format($num, $config = array()){
+    public static function format($num, $config = array())
+    {
         if ($num instanceof Number) {
             $num = $num . '';
         }
-        if(!preg_match('/^([+-]?(\d+(\.\d*)?)|(\.\d+))$/', $num))
+        if (!preg_match('/^([+-]?(\d+(\.\d*)?)|(\.\d+))$/', $num)) {
             throw new \Exception('Number is expecting 1 parameters to be a number.');
-        
+        }
+
         $config = array_replace_recursive(static::$config, $config);
-       
-        $broken_number = explode('.', $num.'');
-        if(count($broken_number) != 2)
-            $broken_number[1] = str_pad ('', $config['precision'], '0', STR_PAD_RIGHT);
-        else $broken_number[1] = str_pad ($broken_number[1], $config['precision'], '0', STR_PAD_RIGHT);
-        
-        if($config['round']) {
-            if($config['precision'] < strlen($broken_number[1])) {
+
+        $broken_number = explode('.', $num . '');
+        if (count($broken_number) != 2) {
+            $broken_number[1] = str_pad('', $config['precision'], '0', STR_PAD_RIGHT);
+        } else {
+            $broken_number[1] = str_pad($broken_number[1], $config['precision'], '0', STR_PAD_RIGHT);
+        }
+
+        if ($config['round']) {
+            if ($config['precision'] < strlen($broken_number[1])) {
                 $pre = substr($broken_number[1], $config['precision'], 1);
                 $broken_number[1] = substr($broken_number[1], 0, $config['precision']);
-                if($pre >= 5) {
+                if ($pre >= 5) {
                     $broken_number[1] += 1;
                 }
             }
         }
-        
+
         return implode('.', $broken_number);
     }
-    
+
     /**
      * Get the sum
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num1
      * @param float|string|\Cydrickn\Number\Number $num2
      * @return \Cydrickn\Number\Number
      */
-    public static function add($num1, $num2){
+    public static function add($num1, $num2)
+    {
         $num1 = new Number($num1);
         return $num1->plus($num2);
     }
-    
+
     /**
      * Get the quotient
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num1
      * @param float|string|\Cydrickn\Number\Number $num2
      * @return \Cydrickn\Number\Number
      */
-    public static function div($num1, $num2){
+    public static function div($num1, $num2)
+    {
         $num1 = new Number($num1);
         return $num1->dividedBy($num2);
     }
-    
+
     /**
      * Get the product
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num1
      * @param float|string|\Cydrickn\Number\Number $num2
      * @return \Cydrickn\Number\Number
      */
-    public static function mul($num1, $num2){
+    public static function mul($num1, $num2)
+    {
         $num1 = new Number($num1);
         return $num1->times($num2);
     }
-    
+
     /**
      * Get the power
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num1
      * @param float|string|\Cydrickn\Number\Number $exponent
      * @return \Cydrickn\Number\Number
      */
-    public static function pow($num1, $exponent) {
+    public static function pow($num1, $exponent)
+    {
         $num1 = new Number($num1);
+
         return $num1->toPower($exponent . '');
     }
-    
+
     /**
      * Get the difference
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num1
      * @param float|string|\Cydrickn\Number\Number $num2
+     *
      * @return \Cydrickn\Number\Number
      */
-    public static function sub($num1, $num2){
+    public static function sub($num1, $num2)
+    {
         $num1 = new Number($num1);
+
         return $num1->sub($num2);
     }
-    
+
     // End of static methods
-    
+
     /**
      * Construct Number Object
      * @param float|string|\Cydrickn\Number\Number $num
@@ -133,14 +144,14 @@ class Number {
             $this->value = static::format ($num, $config);
         else throw new \Exception('Number is expecting 1 parameters to be a number.');
     }
-    
+
     // Methods
-    
+
     # Arithmetic
-    
+
     /**
      * Divided By
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num
      * @return \Cydrickn\Number\Number
      */
@@ -149,10 +160,10 @@ class Number {
         $result = $this->value / $num;
         return new Number($result);
     }
-    
+
     /**
      * Minus
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num
      * @return \Cydrickn\Number\Number
      */
@@ -161,26 +172,26 @@ class Number {
         $result = $this->value - $num;
         return new Number($result);
     }
-    
+
     /**
      * Modulo
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num
      * @return \Cydrickn\Number\Number
      */
     public function modulo($num) {
         $num = $this->format($num);
         $result = $this->value / $num;
-        
+
         $real = intval($result);
-        
+
         $prod = $this->format($real) * $num;
         return $this->sub($prod);
     }
-    
+
     /**
      * Plus
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num
      * @return \Cydrickn\Number\Number
      */
@@ -189,7 +200,7 @@ class Number {
         $result = $this->value + $num;
         return new Number($result);
     }
-    
+
     public static function round() {
         $args = func_get_args();
         $static = !(isset($this) && get_class($this) == __CLASS__);
@@ -215,10 +226,10 @@ class Number {
             return new Number($num);
         }
     }
-    
+
     /**
      * Times
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num
      * @return \Cydrickn\Number\Number
      */
@@ -227,10 +238,10 @@ class Number {
         $result = $this->value * $num;
         return new Number($result);
     }
-    
+
     /**
      * To Power
-     * 
+     *
      * @param float|string|\Cydrickn\Number\Number $num
      * @return \Cydrickn\Number\Number
      */
@@ -243,14 +254,14 @@ class Number {
         $_num = new Number(pow($this->value, $num));
         return $_num;
     }
-    
+
     # end of arithmetic
-    
+
     # Comparison and equality
-    
+
     /**
      * Check if the $num is equal to the value of the Number
-     * 
+     *
      * @param  float|string|\Cydrickn\Number\Number
      * @return boolean
      */
@@ -258,10 +269,10 @@ class Number {
         $num = $this->format($num);
         return $this->value == $num;
     }
-    
+
     /**
      * Check if the value of Number is greater than to $num
-     * 
+     *
      * @param  float|string|\Cydrickn\Number\Number
      * @return boolean
      */
@@ -269,10 +280,10 @@ class Number {
         $num = $this->format($num);
         return $this->value > $num;
     }
-    
+
     /**
      * Check if the value of Number is greater than or equal to $num
-     * 
+     *
      * @param  float|string|\Cydrickn\Number\Number
      * @return boolean
      */
@@ -280,10 +291,10 @@ class Number {
         $num = $this->format($num);
         return $this->value >= $num;
     }
-    
+
     /**
      * Check if the value of Number is less than to $num
-     * 
+     *
      * @param  float|string|\Cydrickn\Number\Number
      * @return boolean
      */
@@ -291,10 +302,10 @@ class Number {
         $num = $this->format($num);
         return $this->value < $num;
     }
-    
+
     /**
      * Check if the value of Number is less than or equal to $num
-     * 
+     *
      * @param  float|string|\Cydrickn\Number\Number
      * @return boolean
      */
@@ -302,10 +313,10 @@ class Number {
         $num = $this->format($num);
         return $this->value < $num;
     }
-    
+
     /**
      * Check if the $num is not equal to the value of the Number
-     * 
+     *
      * @param  float|string|\Cydrickn\Number\Number
      * @return boolean
      */
@@ -313,21 +324,21 @@ class Number {
         $num = $this->format($num);
         return $this->value != $num;
     }
-    
+
     # end of comparison and equality
-    
+
     /**
      * Get the float value
-     * 
+     *
      * @return float
      */
     public function toFloat(){
         return floatval($this->value);
     }
-    
+
     /**
      * Parse an equation
-     * 
+     *
      * @param sting $string
      * @param array $vars
      * @return \Cydrickn\Number\Number
@@ -344,7 +355,7 @@ class Number {
                 $funcs[] = $func;
             }
         }
-        
+
         $string = self::normalize($string, $vars);
         if(!$compute) {
             foreach($funcs as $key => $func) {
@@ -353,10 +364,10 @@ class Number {
             $string = str_replace('#', '', $string);
             return $string;
         }
-        
+
         return new Number(self::parseEq($string, $funcs)['value']);
     }
-    
+
     private static function parseEq($str, $funcs) {
         $index = 0;
         $tokens = array();
@@ -366,7 +377,7 @@ class Number {
             $char = $str[$i];
             if($char == "$") {
                 $tokens[$index] = array('type' => 'FUNC', 'func' => null,'value' => '');
-                
+
                 for($x = $i+1; $x < strlen($str); $x++) {
                     if($str[$x] != '(') {
                         $tokens[$index]['func'] = $str[$x];
@@ -377,7 +388,7 @@ class Number {
                     break;
                 }
                 $i = $x+1;
-                
+
                 $tokens[$index]['value'] = self::findEnd($str, $i, '(', ')');
             } else if ($char == '(') {
                 $i++;
@@ -390,20 +401,20 @@ class Number {
                 $tokens[$index] = array('type' => 'NUM','value' => '');
                 $tokens[$index]['value'] = self::findEnd($str, $i, null, '#');
             }
-            
+
             if($tokens[$index]['type'] == 'PAR') {
                 $tokens[$index] = self::parseEq($tokens[$index]['value'], $funcs);
             } else if($tokens[$index]['type'] == 'FUNC') {
                 $tokens[$index]['value'] = self::parseFunc($tokens[$index]['value'], $funcs);
                 $tokens[$index]['value'] = self::executeFunction($tokens[$index]['func'], $tokens[$index]['value']) . '';
             }
-            
+
             $index++;
         }
-        
+
         return self::compute($tokens);
     }
-    
+
     private static function findEnd($str, &$index, $open, $close) {
         $string = '';
         $count = 1;
@@ -428,13 +439,13 @@ class Number {
         $index = $i;
         return $string;
     }
-    
+
     private static function parseFunc($parse, $funcs) {
         $sps = array();
         $_open = 0;
         $_parse = '';
         $_index = 0;
-        
+
         for($x = 0; $x < strlen($parse); $x++) {
             $c = $parse[$x];
             if($c == '(') {
@@ -458,17 +469,17 @@ class Number {
         foreach($sps as $sp) {
             $args[] = self::parseEq($sp, $funcs)['value'];
         }
-        
+
         return $args;
     }
-    
+
     public static function normalize($string, $vars = array()) {
-        
+
         $string = trim(preg_replace('/((?<=[0-9A-Za-z])(?=[A-Za-z])|(?<=[A-Za-z])(?=[0-9A-Za-z]))/', "*", $string), '*');
-        
+
         $string = str_replace(')$', ')*$', $string);
         $string = str_replace(')(', ')*(', $string);
-        
+
         foreach($vars as $key => $var) {
             $val = $var;
             if(is_numeric($val)) {
@@ -476,10 +487,10 @@ class Number {
             }
             $string = str_replace($key, $val, $string);
         }
-        
+
         return $string;
     }
-    
+
     private static function compute($array) {
         $new_array = $array;
         foreach(self::getOperators() as $opr) {
@@ -492,15 +503,15 @@ class Number {
                         $num2 = $new_array[$index+1]['value'];
                         $num = new Number($num1);
                         switch ($val) {
-                            case '+': 
+                            case '+':
                                 $num = $num->plus($num2);break;
-                            case '-': 
+                            case '-':
                                 $num = $num->minus($num2);break;
-                            case '*': 
+                            case '*':
                                 $num = $num->times($num2);break;
-                            case '/': 
+                            case '/':
                                 $num = $num->dividedBy($num2);break;
-                            case '%': 
+                            case '%':
                                 $num = $num->modulo($num2);break;
                             case '^':
                                 $num = $num->toPower($num2);break;
@@ -515,11 +526,11 @@ class Number {
         }
         return $new_array[0];
     }
-    
+
     private static function getOperators() {
         return array('^','%','*','/','+','-');
     }
-    
+
     private static function isOperator($operator) {
         if($operator instanceof Number) return false;
         $has = false;
@@ -531,13 +542,13 @@ class Number {
         }
         return $has;
     }
-    
+
     private static function isFunctionEq($func) {
         $fns = self::getFunctionsEq();
-        
+
         return in_array($func, $fns);
     }
-    
+
     private static function getFunctionsEq() {
         return array(
             'add',
@@ -548,25 +559,25 @@ class Number {
             'pow'
         );
     }
-    
+
     private static function executeFunction($func, $arguments) {
         $ars = array();
         foreach ($arguments as $arg) {
             $ars[] = $arg . '';
         }
         return call_user_func_array(get_class() .'::' . $func, $arguments);
-    } 
-    
-    
+    }
+
+
     // End of mehods
-    
-    
+
+
     // Magic
-    
+
     public function __toString(){
         return $this->value;
     }
-    
+
     // End of magic
-    
+
 }

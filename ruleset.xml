@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ruleset name="Standard">
+    <description>Custom Standards</description>
+    
+    <arg value="s" />
+    
+    <rule ref="Symfony">
+        <exclude name="Symfony.Functions.Arguments.Invalid" />
+        <exclude name="Symfony.ControlStructure.YodaConditions.Invalid" />
+        <exclude name="Symfony.Commenting.License.Warning" />
+        <exclude name="Symfony.Commenting.FunctionComment.ExtraParamComment" />
+    </rule>
+    
+    <rule ref="Symfony.Commenting.FunctionComment.Missing">
+        <type>warning</type>
+    </rule>
+    <rule ref="Symfony.Commenting.ClassComment.Missing">
+        <type>warning</type>
+    </rule>
+    
+    <rule ref="Squiz.Strings.ConcatenationSpacing">
+        <properties>
+            <property name="spacing" value="1" />
+            <property name="ignoreNewlines" value="true" />
+        </properties>
+    </rule>
+</ruleset>
