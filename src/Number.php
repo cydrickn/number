@@ -110,7 +110,7 @@ class Number {
      */
     public static function sub($num1, $num2){
         $num1 = new Number($num1);
-        return $num1->sub($num2);
+        return $num1->minus($num2);
     }
     
     // End of static methods
