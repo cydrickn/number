@@ -1,4 +1,10 @@
 # Number
+
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/cydrickn/number.svg)](https://packagist.org/packages/cydrickn/number)
+[![Software License](https://img.shields.io/packagist/l/cydrickn/number.svg)](LICENSE)
+[![Run Status](https://api.shippable.com/projects/5bd06d7964e8ed07000b7ec8/badge?branch=master)](https://app.shippable.com/github/cydrickn/number/dashboard)
+[![Coverage Badge](https://api.shippable.com/projects/5bd06d7964e8ed07000b7ec8/coverageBadge?branch=master)](https://app.shippable.com/github/cydrickn/number/dashboard) 
+
 An arbitrary precision for floating point Numbers for PHP
 
 ## Add to composer
