@@ -41,8 +41,9 @@ final class NumberTest extends TestCase
      */
     public function testFormatSuccessfully($value, $config, $expectedResult)
     {
-        $num = Number::format($value, $config);
-        $this->assertSame($expectedResult, $num);
+        $result = Number::format($value, $config);
+
+        $this->assertSame($expectedResult, $result);
     }
 
     public function formatSuccessfullyDataProvider()
@@ -60,9 +61,9 @@ final class NumberTest extends TestCase
      */
     public function testAdd($num1, $num2, $expectedResult)
     {
-        $num = Number::add($num1, $num2);
+        $result = Number::add($num1, $num2);
 
-        $this->assertSame($expectedResult, $num->toString());
+        $this->assertSame($expectedResult, $result->toString());
     }
 
     public function addDataProvider()
@@ -71,28 +72,98 @@ final class NumberTest extends TestCase
         yield [99.999, 1.0, '100.99900'];
     }
 
-    public function testDiv()
+    /**
+     * @dataProvider divDataProvider
+     */
+    public function testDiv($num1, $num2, $expectedResult)
     {
+        $result = Number::div($num1, $num2);
 
+        $this->assertSame($expectedResult, $result->toString());
     }
 
-    public function testMul()
+    public function divDataProvider()
     {
-
+        yield [1, 1, '1.00000'];
+        yield ['1', '1', '1.00000'];
+        yield ['20.06', '3', '6.68667'];
     }
 
-    public function testPow()
+    /**
+     * @dataProvider mulDataProvider
+     */
+    public function testMul($num1, $num2, $expectedResult)
     {
-        
+        $result = Number::mul($num1, $num2);
+
+        $this->assertSame($expectedResult, $result->toString());
     }
 
-    public function testSub()
+    public function mulDataProvider()
     {
+        yield [20, 3.6, '72.00000'];
+        yield [0.0063, 0.23, '0.00145'];
+    }
 
+    /**
+     * @dataProvider powDataProvider
+     */
+    public function testPow($num1, $exponent, $expectedResult)
+    {
+        $result = Number::pow($num1, $exponent);
+
+        $this->assertSame($expectedResult, $result->toString());
+    }
+
+    public function powDataProvider()
+    {
+        yield [2, 2, '4.00000'];
+        yield ['3.69', '2.1', '15.51513'];
+    }
+
+    /**
+     * @dataProvider subDataProvider
+     */
+    public function testSub($num1, $num2, $expectedResult)
+    {
+        $result = Number::sub($num1, $num2);
+
+        $this->assertSame($expectedResult, $result->toString());
+    }
+
+    public function subDataProvider()
+    {
+        yield [2, 1, '1.00000'];
+        yield ['1000.8989', '90312.8912', '-89311.99230'];
+    }
+
+    public function testToString()
+    {
+        $num = new Number(2.0001);
+
+        $this->assertSame('2.00010', $num->toString());
+    }
+
+    public function testToFloat()
+    {
+        $num = new Number('2.00100');
+
+        $this->assertSame(2.001, $num->toFloat());
+    }
+
+    public function testToInt()
+    {
+        $num = new Number(2.001);
+
+        $this->assertSame(2, $num->toInt());
     }
 
     public function testConvertScientificToDecimal()
     {
+        $resultNegativeExponent = Number::convertScientificToDecimal('2.1E-5');
+        $this->assertSame('0.000021', $resultNegativeExponent);
 
+        $resultPositiveExponent = Number::convertScientificToDecimal('2.1E5');
+        $this->assertSame('210000', $resultPositiveExponent);
     }
 }

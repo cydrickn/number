@@ -120,9 +120,16 @@ class Number
 
         if (count($parts) === 2) {
             $exp = abs(end($parts)) + strlen($parts[0]);
-            $decimal = number_format($num, $exp);
+            $result = number_format($num, $exp, '.', '');
 
-            return rtrim($decimal, '.0');
+            list ($int, $decimal) = explode('.', $result);
+            $decimal = rtrim($decimal, '0');
+
+            if ($decimal === '') {
+                return $int;
+            } else {
+                return $int . '.' . $decimal;
+            }
         } else {
             return $num;
         }
