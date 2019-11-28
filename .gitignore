@@ -1,4 +1,4 @@
 /nbproject
 /vendor
+/.idea
 composer.phar
-phpunit.xml
