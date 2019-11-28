@@ -1,4 +1,7 @@
 # Number
+
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/cydrickn/number.svg)](https://packagist.org/packages/cydrickn/number)
+
 An arbitrary precision for floating point Numbers for PHP
 
 ## Add to composer
