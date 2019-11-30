@@ -25,7 +25,7 @@ final class NumberTest extends TestCase
     {
         parent::setUp();
 
-        Number::setConfig(['precision' => 5]);
+        Number::setConfig(['precision' => 20]);
     }
 
     public function testFormatFailed()
@@ -70,6 +70,11 @@ final class NumberTest extends TestCase
     {
         yield [1, 1, '2.00000'];
         yield [99.999, 1.0, '100.99900'];
+        yield [100, 100.9, '200.9'];
+        yield [100, -100.9, '-0.9'];
+        yield [-100, 100.9, '0.9'];
+        yield [-100, -100.9, '-200.9'];
+        yield ['11111111.11111111543', '11111111.11111111', '22222222.22222222543'];
     }
 
     /**
